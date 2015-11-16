@@ -1,11 +1,16 @@
-CREATE TABLE `account` (`id_account` int(11) NOT NULL AUTO_INCREMENT,
+CREATE DATABASE forum;
+CREATE USER 'forum_admin'@'localhost' IDENTIFIED BY '123456';
+GRANT ALL PRIVILEGES ON forum.* TO 'forum_admin'@'localhost';
+USE forum;
+
+CREATE TABLE `account` (
+  `id_account` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(20) NOT NULL,
   `password` int(20) NOT NULL,
   PRIMARY KEY (`id_account`))
   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `themes` (
-
   `id_theme` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `date` date NOT NULL,
@@ -32,7 +37,7 @@ CREATE TABLE `user_info` (
   REFERENCES `account` (`id_account`) ON DELETE NO ACTION ON UPDATE NO ACTION)
   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `forum`.`posts` (
+CREATE TABLE `posts` (
   `id_post` INT NOT NULL AUTO_INCREMENT,
   `text` BLOB NOT NULL,
   `date` DATE NOT NULL,
@@ -43,9 +48,9 @@ CREATE TABLE `forum`.`posts` (
   INDEX `id_account_idx_post` (`id_account_idx_post` ASC),
   CONSTRAINT `id_theme_idx_post`
   FOREIGN KEY (`id_theme_idx_post`)
-  REFERENCES `forum`.`themes` (`id_theme`)ON DELETE NO ACTION ON UPDATE NO ACTION,
+  REFERENCES `themes` (`id_theme`)ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `id_account_idx_post`
   FOREIGN KEY (`id_account_idx_post`)
-  REFERENCES `forum`.`account` (`id_account`)
+  REFERENCES `account` (`id_account`)
   ON DELETE NO ACTION ON UPDATE NO ACTION)
   ENGINE = InnoDBDEFAULT CHARACTER SET = utf8;
