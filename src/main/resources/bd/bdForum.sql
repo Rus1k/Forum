@@ -6,11 +6,11 @@ USE forum;
 CREATE TABLE `account` (
   `id_account` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(20) NOT NULL,
-  `password` int(20) NOT NULL,
+  `password` varchar (20) NOT NULL,
   PRIMARY KEY (`id_account`))
   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `themes` (
+CREATE TABLE `theme` (
   `id_theme` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `date` date NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE `user_info` (
   REFERENCES `account` (`id_account`) ON DELETE NO ACTION ON UPDATE NO ACTION)
   ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `posts` (
+CREATE TABLE `post` (
   `id_post` INT NOT NULL AUTO_INCREMENT,
   `text` BLOB NOT NULL,
   `date` DATE NOT NULL,
@@ -53,4 +53,4 @@ CREATE TABLE `posts` (
   FOREIGN KEY (`id_account_idx_post`)
   REFERENCES `account` (`id_account`)
   ON DELETE NO ACTION ON UPDATE NO ACTION)
-  ENGINE = InnoDBDEFAULT CHARACTER SET = utf8;
+  ENGINE = InnoDB DEFAULT CHARACTER SET = utf8;
