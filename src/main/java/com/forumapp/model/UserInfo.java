@@ -1,12 +1,14 @@
 package com.forumapp.model;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
 @Builder
+@AllArgsConstructor
 
 public class UserInfo {
 
@@ -18,4 +20,7 @@ public class UserInfo {
     private String email;
     private String city;
 
+    public UserInfo() {
+
+    }
 }
