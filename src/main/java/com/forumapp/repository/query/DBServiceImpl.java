@@ -1,9 +1,6 @@
 package com.forumapp.repository.query;
 
-import com.forumapp.model.Account;
-import com.forumapp.model.Post;
-import com.forumapp.model.Theme;
-import com.forumapp.model.UserInfo;
+import com.forumapp.model.*;
 import com.forumapp.repository.Connect;
 
 import java.sql.*;
@@ -13,20 +10,23 @@ import java.util.List;
 
 public class DBServiceImpl implements DBService {
 
-    public static final String INSERT_ACCOUNT = "INSERT INTO account VALUES (?,?)";
+    public static final String INSERT_ACCOUNT = "INSERT INTO account(login, password) VALUES (?,?)";
     public static final String INSERT_POST = "INSERT INTO posts VALUES (?,?)";
     public static final String INSERT_THEME = "INSERT INTO themes VALUES (?,?)";
-    public static final String INSERT_USERINFO = "INSERT INTO user_info VALUES (?,?,?,?,?)";
+    public static final String INSERT_USERINFO = "INSERT INTO user_info (first_name, last_name, birthday, email, city, id_account) VALUES (?,?,?,?,?,?)";
     public static final String SELECT_USERINFO = "SELECT id_user_info,first_name,last_name,birthday,email,city FROM user_info " +
             "INNER JOIN account ON user_info.id_user_info = account.id_account WHERE login = ?";
     public static final String SELECT_POST_FROM_THEME = "SELECT * FROM post WHERE id_theme_idx_post = ?";
     public static final String SELECT_THEME_FROM_ACCOUNT = "SELECT * FROM theme WHERE id_account_idx_theme = ?";
     public static final String SELECT_ACCOUNT = "SELECT * FROM account WHERE id_account = ?";
+    public static final String SELECT_COUNT = "SELECT COUNT(*) AS accountCount FROM forum.account WHERE login = ?";
     public static final String DELETE_ACCOUNT = "DELETE FROM account WHERE login = ?";
     public static final String DELETE_POST = "DELETE FROM posts WHERE id_post = ?";
     public static final String DELETE_THEME = "DELETE FROM themes WHERE id_theme = ?";
-    public static final String UPDATE_UserInfo = "UPDATE user_info SET first_name = ?, last_name = ?, birthday = ?,email = ?, city = ? " +
+    public static final String UPDATE_USERINFO = "UPDATE user_info SET first_name = ?, last_name = ?, birthday = ?,email = ?, city = ? " +
             "WHERE id_user_info = ?";
+    public static final boolean LOGIN_EXISTS = true;
+    public static final boolean LOGIN_FREE = false;
     String returnText = null;
 
 
@@ -35,19 +35,21 @@ public class DBServiceImpl implements DBService {
 
 
     @Override
-    public void saveAccount(Account account) {
+    public int saveAccount(Account account) {
+        int generatedID = 0;
         try {
-            preparedStatement = connection.prepareStatement(INSERT_ACCOUNT);
+            preparedStatement = connection.prepareStatement(INSERT_ACCOUNT, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, account.getLogin());
             preparedStatement.setString(2, account.getPassword());
-            int i = preparedStatement.executeUpdate();
-            if (i == 0) {
-                System.out.println("no changes");
-            }else System.out.println("saved successfully");
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if(resultSet.next()){
+                generatedID = resultSet.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-
+        return generatedID;
     }
 
     @Override
@@ -81,21 +83,25 @@ public class DBServiceImpl implements DBService {
     }
 
     @Override
-    public void saveUserInfo(UserInfo userInfo) {
+    public int saveUserInfo(UserInfo userInfo) {
+        int generatedID = 0;
         try {
-            preparedStatement = connection.prepareStatement(INSERT_USERINFO);
+            preparedStatement = connection.prepareStatement(INSERT_USERINFO,Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, userInfo.getFirstName());
             preparedStatement.setString(2, userInfo.getLastName());
             preparedStatement.setDate(3, Date.valueOf(userInfo.getBirthday()));
             preparedStatement.setString(4, userInfo.getEmail());
             preparedStatement.setString(5, userInfo.getCity());
-            int i = preparedStatement.executeUpdate();
-            if (i == 0) {
-                System.out.println("no changes");
-            }else System.out.println("saved successfully");
+            preparedStatement.setInt(6, userInfo.getIdAccount());
+            preparedStatement.executeUpdate();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            if(resultSet.next()){
+                generatedID = resultSet.getInt(1);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return generatedID;
     }
 
     @Override
@@ -114,8 +120,25 @@ public class DBServiceImpl implements DBService {
     }
 
     @Override
+    public boolean checkLogin(String login) {
+        boolean result = LOGIN_FREE;
+        try {
+            preparedStatement = connection.prepareStatement(SELECT_COUNT);
+            preparedStatement.setString(1, login);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next() && resultSet.getInt("accountCount") != 0){
+                result = LOGIN_EXISTS;
+                System.out.println("return TRUE!!");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @Override
     public List<Post> getPost(int idTheme) {
-        List<Post> list = new ArrayList<>();
+        List<Post> list = new ArrayList<Post>();
         try {
             preparedStatement = connection.prepareStatement(SELECT_POST_FROM_THEME);
             preparedStatement.setInt(1,idTheme);
@@ -133,7 +156,7 @@ public class DBServiceImpl implements DBService {
 
     @Override
     public List<Theme> getTheme(int idAccount) {
-        List<Theme> list = new ArrayList<>();
+        List<Theme> list = new ArrayList<Theme>();
         try {
             preparedStatement = connection.prepareStatement(SELECT_THEME_FROM_ACCOUNT);
             preparedStatement.setInt(1, idAccount);
@@ -220,7 +243,7 @@ public class DBServiceImpl implements DBService {
     @Override
     public String changeUserInfo(UserInfo userInfo) {
         try {
-            preparedStatement = connection.prepareStatement(UPDATE_UserInfo);
+            preparedStatement = connection.prepareStatement(UPDATE_USERINFO);
             preparedStatement.setString(1, userInfo.getFirstName());
             preparedStatement.setString(2, userInfo.getLastName());
             preparedStatement.setDate(3, Date.valueOf(userInfo.getBirthday()));

@@ -1,10 +1,6 @@
 package com.forumapp.repository.query;
 
-import com.forumapp.model.Post;
-import com.forumapp.model.Theme;
-import com.forumapp.model.Account;
-import com.forumapp.model.UserInfo;
-
+import com.forumapp.model.*;
 import java.util.List;
 
 /**
@@ -12,12 +8,13 @@ import java.util.List;
  */
 public interface DBService {
 
-    void saveAccount(Account account);
+    int saveAccount(Account account);
     void savePost(Post post);
     void saveTheme(Theme themes);
-    void saveUserInfo(UserInfo userInfo);
+    int saveUserInfo(UserInfo userInfo);
 
     Account getAccount(int idAccount);
+    boolean checkLogin(String login);
     List<Post> getPost(int idTheme);
     List<Theme> getTheme(int idAccount);
     UserInfo getUserInfo(String userLogin);
